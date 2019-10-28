@@ -5,26 +5,44 @@ import (
 	"time"
 )
 
-func printAngka() {
-	for i := 0; i < 5; i++ {
-		time.Sleep(100 * time.Millisecond)
-		fmt.Println(i)
-	}
-}
-
-func printText() {
-	for i := 0; i < 5; i++ {
-		time.Sleep(500 * time.Millisecond)
-		fmt.Println("Text", i)
-	}
-}
+// channel
+var itemsChannel = make(chan string)
+var cleansItemsChannel = make(chan string)
+var savedItemsChannel = make(chan string)
 
 func main() {
-	start := time.Now()
+	items := [7]string{"batu", "harta", "kerang", "harta", "batu", "harta", "kerang"}
+	// menyelam mencari harta karun
+	// terdiri dari banyak barang
+	// 1. Penyelam, 2. Pembersih 3. Penyimpan
+	// channel
 
-	go printAngka()
-	go printText()
+	go penyelam(items)
+	go pembersih()
+	go penyimpan()
 
-	time.Sleep(3000 * time.Millisecond)
-	fmt.Println(time.Since(start))
+	time.Sleep(500 * time.Millisecond)
+}
+
+func penyelam(items [7]string) {
+	for _, item := range items {
+		if item == "harta" {
+			fmt.Println("Berhasil Mendapatkan" + item)
+			itemsChannel <- item
+		}
+	}
+}
+
+func pembersih() {
+	for rawItem := range itemsChannel {
+		fmt.Println("Berhasil Membersihkan" + rawItem)
+		cleansItemsChannel <- rawItem
+	}
+}
+
+func penyimpan() {
+	for rawItem := range cleansItemsChannel {
+		fmt.Println("Berhasil Menyimpan" + rawItem)
+		savedItemsChannel <- rawItem
+	}
 }
